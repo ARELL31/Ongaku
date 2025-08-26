@@ -1,0 +1,3 @@
+#!/bin/bash
+# Limpiar antes de desinstalar
+exit 0

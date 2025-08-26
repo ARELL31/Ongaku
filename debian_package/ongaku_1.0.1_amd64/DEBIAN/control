@@ -1,0 +1,18 @@
+Package: ongaku
+Version: 1.0.1
+Section: multimedia
+Priority: optional
+Architecture: amd64
+Depends: libgtk-4-1, libadwaita-1-0, yt-dlp
+Maintainer: Arell <arell@example.com>
+Description: Download Music Freely
+ Ongaku is a modern GTK4/Libadwaita application for downloading
+ audio from YouTube videos and playlists as MP3 files.
+ .
+ Features:
+  - Download individual YouTube videos as MP3
+  - Download entire YouTube playlists
+  - Modern GTK4/Libadwaita interface
+  - Progress tracking
+  - History of downloaded files
+Installed-Size: 240

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Ongaku
+Comment=Download Music Freely
+Exec=ongaku
+Icon=ongaku
+Type=Application
+Categories=AudioVideo;Audio;
+StartupNotify=true
