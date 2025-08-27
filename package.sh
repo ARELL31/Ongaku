@@ -1,5 +1,4 @@
 #!/bin/bash
-
 VERSION="1.0.1"
 PACKAGE_NAME="ongaku"
 ARCHITECTURE="amd64"
@@ -19,10 +18,19 @@ PACKAGE_DIR="debian_package/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}"
 mkdir -p ${PACKAGE_DIR}/DEBIAN
 mkdir -p ${PACKAGE_DIR}/usr/bin
 mkdir -p ${PACKAGE_DIR}/usr/share/applications
-mkdir -p ${PACKAGE_DIR}/usr/share/pixmaps
+mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/scalable/apps
+mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/48x48/apps
+mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps
 
 cp build/ongaku ${PACKAGE_DIR}/usr/bin/
-cp media/logo.svg ${PACKAGE_DIR}/usr/share/pixmaps/ongaku.svg
+cp media/logo.svg ${PACKAGE_DIR}/usr/share/icons/hicolor/scalable/apps/ongaku.svg
+
+if command -v inkscape >/dev/null 2>&1; then
+    inkscape --export-type=png --export-width=48 --export-height=48 \
+        media/logo.svg -o ${PACKAGE_DIR}/usr/share/icons/hicolor/48x48/apps/ongaku.png
+    inkscape --export-type=png --export-width=64 --export-height=64 \
+        media/logo.svg -o ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps/ongaku.png
+fi
 
 cat > ${PACKAGE_DIR}/usr/share/applications/ongaku.desktop << EOF
 [Desktop Entry]
@@ -66,7 +74,7 @@ if command -v update-desktop-database >/dev/null 2>&1; then
 fi
 
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-    gtk-update-icon-cache -q -t -f /usr/share/pixmaps
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor
 fi
 
 exit 0
