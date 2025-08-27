@@ -11,6 +11,21 @@ namespace Ongaku {
             var window = new MainWindow(this);
             window.present();
         }
+
+        protected override void startup() {
+            base.startup();
+
+
+            var quit_action = new GLib.SimpleAction("quit", null);
+            quit_action.activate.connect(() => {
+                quit();
+            });
+            add_action(quit_action);
+
+
+            string[] quit_accels = {"<primary>q"};
+            set_accels_for_action("app.quit", quit_accels);
+        }
     }
 }
 
