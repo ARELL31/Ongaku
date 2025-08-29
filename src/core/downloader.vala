@@ -2,6 +2,12 @@ using Posix;
 
 namespace Ongaku {
     public class Downloader : Object {
+        private Settings settings;
+
+        public Downloader() {
+            settings = new Settings();
+        }
+
         public async string download(string url, string output_dir, bool is_playlist) throws Error {
             return yield run_ytdlp(url, output_dir, is_playlist);
         }
@@ -9,12 +15,72 @@ namespace Ongaku {
         private async string run_ytdlp(string url, string output_dir, bool is_playlist) throws Error {
             string output_path = Path.build_filename(output_dir, "%(title)s.%(ext)s");
 
-            string[] argv = {
-                "yt-dlp",
-                "-x",
-                "--audio-format", "mp3",
-                "--output", output_path
-            };
+            string[] argv = {"yt-dlp"};
+
+
+            int content_type = settings.get_content_type();
+
+            switch (content_type) {
+                case Settings.ContentType.AUDIO_ONLY:
+
+                    argv += "-x";
+                    argv += "--audio-format";
+                    argv += settings.get_audio_format_string();
+
+
+                    string audio_quality = settings.get_audio_quality_string();
+                    if (audio_quality != "bestaudio") {
+                        argv += "-f";
+                        argv += audio_quality;
+                    }
+
+
+                    if (settings.get_embed_thumbnails()) {
+                        argv += "--embed-thumbnail";
+                    }
+                    break;
+
+                case Settings.ContentType.VIDEO:
+
+                    string video_format = settings.get_video_format_string();
+                    string video_quality = settings.get_video_quality_string();
+
+                    if (video_quality != "best") {
+                        argv += "-f";
+                        argv += @"$(video_quality)[ext=$(video_format)]+bestaudio[ext=m4a]/$(video_quality)+bestaudio/best[ext=$(video_format)]/best";
+                    } else {
+                        argv += "-f";
+                        argv += @"bestvideo[ext=$(video_format)]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=$(video_format)]/best";
+                    }
+
+
+                    argv += "--merge-output-format";
+                    argv += video_format;
+                    break;
+
+                case Settings.ContentType.BOTH:
+
+                    argv += "-f";
+                    argv += @"$(settings.get_video_quality_string()),$(settings.get_audio_quality_string())";
+
+
+                    output_path = Path.build_filename(output_dir, "%(title)s.f%(format_id)s.%(ext)s");
+                    break;
+            }
+
+
+            argv += "--output";
+            argv += output_path;
+            argv += "--ignore-errors";
+            argv += "--no-warnings";
+
+
+            int max_res = settings.get_max_resolution();
+            if (max_res > 0 && content_type != Settings.ContentType.AUDIO_ONLY) {
+                argv += "-f";
+                argv += @"best[height<=$(max_res)]";
+            }
+
 
             if (!is_playlist) {
                 argv += "--no-playlist";
@@ -71,14 +137,29 @@ namespace Ongaku {
                     throw new IOError.FAILED("yt-dlp failed: " + error_output);
                 }
 
-                string result_type = is_playlist ? "Playlist download" : "Download";
-                return result_type + " completed successfully in " + output_dir;
+                string content_desc = get_content_description();
+                string result_type = is_playlist ? "Playlist" : "Content";
+                return @"$(result_type) download ($(content_desc)) completed successfully in $(output_dir)";
 
             } catch (SpawnError e) {
                 if (e.code == SpawnError.NOENT) {
                     throw new IOError.NOT_FOUND("yt-dlp is not installed. Install it with: sudo apt install yt-dlp");
                 }
                 throw new IOError.FAILED("Error running yt-dlp: " + e.message);
+            }
+        }
+
+        private string get_content_description() {
+            int content_type = settings.get_content_type();
+            switch (content_type) {
+                case Settings.ContentType.AUDIO_ONLY:
+                    return @"Audio: $(settings.get_audio_format_string().up())";
+                case Settings.ContentType.VIDEO:
+                    return @"Video: $(settings.get_video_format_string().up())";
+                case Settings.ContentType.BOTH:
+                    return "Audio + Video (separate)";
+                default:
+                    return "Unknown";
             }
         }
     }

@@ -2,13 +2,12 @@ namespace Ongaku {
     public class DownloadForm : Gtk.Box {
         public signal void download_requested(string url, string directory, bool is_playlist);
 
-        private Adw.ToggleGroup toggle_group;
         private Gtk.Entry url_entry;
         private Gtk.Entry directory_entry;
         private Gtk.Button folder_button;
         private Gtk.Button download_button;
         private Gtk.Label status_label;
-        private Gtk.Box form_container;
+        private Gtk.Label url_type_label;
         private string? selected_directory = null;
 
         public DownloadForm() {
@@ -23,108 +22,115 @@ namespace Ongaku {
             margin_start = 20;
             margin_end = 20;
 
-            create_toggle_group();
             create_form_widgets();
-            update_form_content();
-        }
-
-        private void create_toggle_group() {
-            var toggle_container = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            toggle_container.set_halign(Gtk.Align.CENTER);
-
-            toggle_group = new Adw.ToggleGroup();
-            toggle_group.add_css_class("flat");
-            toggle_group.add_css_class("round");
-            toggle_group.set_homogeneous(true);
-
-            var toggle_mp3 = new Adw.Toggle();
-            toggle_mp3.set_label("Download MP3");
-            toggle_mp3.set_icon_name("audio-x-generic-symbolic");
-            toggle_mp3.set_name("mp3");
-            toggle_group.add(toggle_mp3);
-
-            var toggle_playlist = new Adw.Toggle();
-            toggle_playlist.set_label("Download Playlist");
-            toggle_playlist.set_icon_name("folder-music-symbolic");
-            toggle_playlist.set_name("playlist");
-            toggle_group.add(toggle_playlist);
-
-            toggle_group.set_active_name("mp3");
-            toggle_container.append(toggle_group);
-            append(toggle_container);
-
-            form_container = new Gtk.Box(Gtk.Orientation.VERTICAL, 15);
-            append(form_container);
         }
 
         private void create_form_widgets() {
+
+            var instructions = new Gtk.Label("Paste YouTube URL:");
+            instructions.set_halign(Gtk.Align.START);
+            instructions.add_css_class("title-4");
+            append(instructions);
+
+
+            var url_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 6);
+
             url_entry = new Gtk.Entry();
+            url_entry.set_placeholder_text("https://www.youtube.com/watch?v=... or https://www.youtube.com/playlist?list=...");
             url_entry.set_hexpand(true);
+            url_box.append(url_entry);
 
-            directory_entry = new Gtk.Entry();
-            directory_entry.set_text(Ongaku.FileUtils.get_default_music_directory());
-            directory_entry.set_hexpand(true);
-            directory_entry.set_editable(false);
 
-            folder_button = new Gtk.Button.with_label("Browse");
+            url_type_label = new Gtk.Label("");
+            url_type_label.set_halign(Gtk.Align.START);
+            url_type_label.add_css_class("caption");
+            url_type_label.add_css_class("dim-label");
+            url_type_label.set_visible(false);
+            url_box.append(url_type_label);
 
-            download_button = new Gtk.Button();
-            download_button.add_css_class("suggested-action");
-            download_button.add_css_class("pill");
-            download_button.set_hexpand(true);
+            append(url_box);
 
-            status_label = new Gtk.Label("Ready to download");
-            status_label.set_halign(Gtk.Align.START);
-            status_label.set_wrap(true);
-        }
-
-        private void setup_signals() {
-            toggle_group.notify["active-name"].connect(update_form_content);
-            folder_button.clicked.connect(on_folder_button_clicked);
-            download_button.clicked.connect(on_download_button_clicked);
-            url_entry.activate.connect(on_download_button_clicked);
-        }
-
-        private void update_form_content() {
-
-            while (form_container.get_first_child() != null) {
-                form_container.remove(form_container.get_first_child());
-            }
-
-            string active_mode = toggle_group.get_active_name();
-
-            if (active_mode == "mp3") {
-                var instructions = new Gtk.Label("Paste YouTube URL to download as MP3:");
-                instructions.set_halign(Gtk.Align.START);
-                instructions.add_css_class("title-4");
-
-                url_entry.set_placeholder_text("https://www.youtube.com/watch?v=...");
-                download_button.set_label("Download MP3");
-
-                form_container.append(instructions);
-            } else {
-                var instructions = new Gtk.Label("Paste YouTube playlist URL:");
-                instructions.set_halign(Gtk.Align.START);
-                instructions.add_css_class("title-4");
-
-                url_entry.set_placeholder_text("https://www.youtube.com/playlist?list=...");
-                download_button.set_label("Download Playlist");
-
-                form_container.append(instructions);
-            }
-
-            form_container.append(url_entry);
 
             var directory_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 10);
             var directory_label = new Gtk.Label("Save to:");
             directory_label.set_halign(Gtk.Align.START);
             directory_box.append(directory_label);
+
+            directory_entry = new Gtk.Entry();
+            directory_entry.set_text(Ongaku.FileUtils.get_default_music_directory());
+            directory_entry.set_hexpand(true);
+            directory_entry.set_editable(false);
             directory_box.append(directory_entry);
+
+            folder_button = new Gtk.Button.with_label("Browse");
             directory_box.append(folder_button);
 
-            form_container.append(directory_box);
-            form_container.append(download_button);
-            form_container.append(status_label);
+            append(directory_box);
+
+
+            download_button = new Gtk.Button.with_label("Download");
+            download_button.add_css_class("suggested-action");
+            download_button.add_css_class("pill");
+            download_button.set_hexpand(true);
+            append(download_button);
+
+
+            status_label = new Gtk.Label("Ready to download");
+            status_label.set_halign(Gtk.Align.START);
+            status_label.set_wrap(true);
+            append(status_label);
+        }
+
+        private void setup_signals() {
+            folder_button.clicked.connect(on_folder_button_clicked);
+            download_button.clicked.connect(on_download_button_clicked);
+            url_entry.activate.connect(on_download_button_clicked);
+            url_entry.changed.connect(on_url_changed);
+        }
+
+        private void on_url_changed() {
+            string url = url_entry.get_text().strip();
+
+            if (url.length == 0) {
+                url_type_label.set_visible(false);
+                download_button.set_label("Download");
+                return;
+            }
+
+            if (!is_valid_youtube_url(url)) {
+                url_type_label.set_text("⚠ Invalid YouTube URL");
+                url_type_label.set_visible(true);
+                url_type_label.remove_css_class("success");
+                url_type_label.add_css_class("error");
+                download_button.set_label("Download");
+                return;
+            }
+
+            bool is_playlist = detect_playlist_url(url);
+
+            if (is_playlist) {
+                url_type_label.set_text("Playlist detected - will download all videos");
+                download_button.set_label("Download Playlist");
+                url_type_label.add_css_class("accent");
+            } else {
+                url_type_label.set_text("Single video detected");
+                download_button.set_label("Download MP3");
+                url_type_label.add_css_class("success");
+            }
+
+            url_type_label.remove_css_class("error");
+            url_type_label.set_visible(true);
+        }
+
+        private bool is_valid_youtube_url(string url) {
+            return url.contains("youtube.com") || url.contains("youtu.be");
+        }
+
+        private bool detect_playlist_url(string url) {
+
+            return url.contains("playlist?list=") ||
+                   url.contains("&list=") ||
+                   url.contains("watch?v=") && url.contains("&list=");
         }
 
         private void on_folder_button_clicked() {
@@ -156,20 +162,20 @@ namespace Ongaku {
         }
 
         private void on_download_button_clicked() {
-            string url = url_entry.get_text();
+            string url = url_entry.get_text().strip();
 
-            if (url == null || url.strip().length == 0) {
+            if (url.length == 0) {
                 set_status("Please enter a valid URL.");
                 return;
             }
 
-            if (!url.contains("youtube.com") && !url.contains("youtu.be")) {
+            if (!is_valid_youtube_url(url)) {
                 set_status("Please enter a valid YouTube URL.");
                 return;
             }
 
             string directory = selected_directory ?? Ongaku.FileUtils.get_default_music_directory();
-            bool is_playlist = toggle_group.get_active_name() == "playlist";
+            bool is_playlist = detect_playlist_url(url);
 
             download_requested(url, directory, is_playlist);
         }
@@ -182,6 +188,11 @@ namespace Ongaku {
             download_button.set_sensitive(sensitive);
             folder_button.set_sensitive(sensitive);
             url_entry.set_sensitive(sensitive);
+        }
+
+        public void clear_url() {
+            url_entry.set_text("");
+            on_url_changed();
         }
     }
 }

@@ -1,5 +1,5 @@
 Package: ongaku
-Version: 1.0.2
+Version: 1.0.3
 Section: multimedia
 Priority: optional
 Architecture: amd64
@@ -15,4 +15,4 @@ Description: Download Music Freely
   - Modern GTK4/Libadwaita interface
   - Progress tracking
   - History of downloaded files
-Installed-Size: 292
+Installed-Size: 380

@@ -1,5 +1,5 @@
 project('ongaku', 'vala', 'c',
-    version: '1.0.1',
+    version: '1.0.2',
     license: 'GPL-3.0-or-later'
 )
 
@@ -18,7 +18,9 @@ sources = [
     'src/widgets/progress_bar.vala',
     'src/core/downloader.vala',
     'src/core/config.vala',
-    'src/utils/file_utils.vala'
+    'src/core/settings.vala',
+    'src/utils/file_utils.vala',
+    'src/dialogs/preferences.vala'
 ]
 
 vala_args = [

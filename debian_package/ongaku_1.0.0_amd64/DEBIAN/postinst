@@ -1,4 +1,0 @@
-#!/bin/bash
-# Actualizar base de datos de aplicaciones
-update-desktop-database
-gtk-update-icon-cache /usr/share/pixmaps/ || true

@@ -138,11 +138,10 @@ namespace Ongaku {
         }
 
         private void on_preferences() {
-
-            var toast = new Adw.Toast("Preferences coming soon!");
-
-            print("Preferences action triggered\n");
+            var preferences_window = new PreferencesWindow(this);
+            preferences_window.present();
         }
+
 
         private void on_about() {
             var about_dialog = new Adw.AboutDialog();
