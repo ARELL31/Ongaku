@@ -1,5 +1,5 @@
 project('ongaku', 'vala', 'c',
-    version: '1.0.2',
+    version: '1.0.3',
     license: 'GPL-3.0-or-later'
 )
 
@@ -31,4 +31,22 @@ executable('ongaku', sources,
     dependencies: dependencies,
     vala_args: vala_args,
     install: true
+)
+
+# Procesar subdirectorio data (schemas)
+subdir('data')
+
+# SpotDL personalizado
+install_subdir('spotdl-custom',
+    install_dir: get_option('datadir') / 'ongaku'
+)
+
+# Script wrapper
+configure_file(
+    input: 'scripts/spotdl-wrapper.sh.in',
+    output: 'spotdl-wrapper.sh',
+    configuration: {'DATADIR': get_option('prefix') / get_option('datadir')},
+    install: true,
+    install_dir: get_option('bindir'),
+    install_mode: 'rwxr-xr-x'
 )

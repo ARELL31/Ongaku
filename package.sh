@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="1.0.3"
+VERSION="1.1.0"
 PACKAGE_NAME="ongaku"
 ARCHITECTURE="amd64"
 
@@ -9,20 +9,28 @@ rm -rf build
 rm -rf debian_package/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}
 rm -f debian_package/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb
 
+echo "Preparing SpotDL custom environment..."
+./prepare-spotdl.sh
+
 echo "Building..."
 meson setup build
 ninja -C build
 
 echo "Creating package structure..."
 PACKAGE_DIR="debian_package/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}"
+
 mkdir -p ${PACKAGE_DIR}/DEBIAN
 mkdir -p ${PACKAGE_DIR}/usr/bin
 mkdir -p ${PACKAGE_DIR}/usr/share/applications
 mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/scalable/apps
 mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/48x48/apps
 mkdir -p ${PACKAGE_DIR}/usr/share/icons/hicolor/64x64/apps
+mkdir -p ${PACKAGE_DIR}/usr/share/ongaku
 
 cp build/ongaku ${PACKAGE_DIR}/usr/bin/
+cp build/spotdl-wrapper.sh ${PACKAGE_DIR}/usr/bin/
+cp -r spotdl-custom ${PACKAGE_DIR}/usr/share/ongaku/
+
 cp media/logo.svg ${PACKAGE_DIR}/usr/share/icons/hicolor/scalable/apps/ongaku.svg
 
 if command -v inkscape >/dev/null 2>&1; then
@@ -51,7 +59,7 @@ Version: ${VERSION}
 Section: multimedia
 Priority: optional
 Architecture: ${ARCHITECTURE}
-Depends: libgtk-4-1, libadwaita-1-0, yt-dlp
+Depends: libgtk-4-1, libadwaita-1-0, python3 (>= 3.8), python3-distutils
 Maintainer: Arell <arell@example.com>
 Description: Download Music Freely
  Ongaku is a modern GTK4/Libadwaita application for downloading
@@ -63,6 +71,7 @@ Description: Download Music Freely
   - Modern GTK4/Libadwaita interface
   - Progress tracking
   - History of downloaded files
+  - Includes custom SpotDL with bug fixes
 EOF
 
 cat > ${PACKAGE_DIR}/DEBIAN/postinst << 'EOF'
@@ -75,6 +84,11 @@ fi
 
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
     gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor
+fi
+
+SPOTDL_DIR="/usr/share/ongaku/spotdl-custom"
+if [ -d "$SPOTDL_DIR" ]; then
+    find "$SPOTDL_DIR/bin" -type f -exec chmod +x {} \;
 fi
 
 exit 0

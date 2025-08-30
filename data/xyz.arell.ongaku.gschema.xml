@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="xyz.arell.ongaku" path="/xyz/arell/ongaku/">
+
+    <key name="content-type" type="i">
+      <default>0</default>
+      <summary>Content type</summary>
+      <description>What type of content to download by default</description>
+    </key>
+
+    <key name="audio-format" type="i">
+      <default>0</default>
+      <summary>Audio format</summary>
+      <description>Preferred audio extraction format</description>
+    </key>
+
+    <key name="video-format" type="i">
+      <default>0</default>
+      <summary>Video format</summary>
+      <description>Preferred video container format</description>
+    </key>
+
+    <key name="video-quality" type="i">
+      <default>0</default>
+      <summary>Video quality</summary>
+      <description>Preferred maximum video quality</description>
+    </key>
+
+    <key name="audio-quality" type="i">
+      <default>0</default>
+      <summary>Audio quality</summary>
+      <description>Preferred audio bitrate</description>
+    </key>
+
+    <key name="max-resolution" type="i">
+      <default>0</default>
+      <summary>Max resolution</summary>
+      <description>Maximum video resolution (0 = no limit)</description>
+    </key>
+
+    <key name="clear-url-after-download" type="b">
+      <default>true</default>
+      <summary>Clear URL after download</summary>
+      <description>Whether to clear the URL field after successful download</description>
+    </key>
+
+    <key name="embed-thumbnails" type="b">
+      <default>true</default>
+      <summary>Embed thumbnails</summary>
+      <description>Embed video thumbnails as album art</description>
+    </key>
+
+    <key name="spotify-format" type="i">
+      <default>0</default>
+      <summary>Spotify format</summary>
+      <description>Spotify audio format preference</description>
+    </key>
+
+    <key name="spotify-bitrate" type="i">
+      <default>0</default>
+      <summary>Spotify bitrate</summary>
+      <description>Spotify audio bitrate preference</description>
+    </key>
+
+    <key name="spotify-output-format" type="s">
+      <default>"{artist} - {title}"</default>
+      <summary>Spotify output format</summary>
+      <description>File naming format for Spotify downloads</description>
+    </key>
+
+    <key name="spotify-overwrite" type="i">
+      <default>0</default>
+      <summary>Spotify overwrite mode</summary>
+      <description>How to handle existing files in Spotify downloads</description>
+    </key>
+
+    <key name="spotify-lyrics" type="b">
+      <default>true</default>
+      <summary>Spotify lyrics</summary>
+      <description>Download and embed synchronized lyrics</description>
+    </key>
+
+    <key name="spotify-album-art" type="b">
+      <default>true</default>
+      <summary>Spotify album art</summary>
+      <description>Whether to embed album artwork</description>
+    </key>
+
+    <key name="spotify-search-provider" type="i">
+      <default>0</default>
+      <summary>Spotify search provider</summary>
+      <description>Audio source provider for Spotify tracks</description>
+    </key>
+
+    <key name="spotify-template" type="i">
+      <default>0</default>
+      <summary>Spotify filename template</summary>
+      <description>SpotDL filename template preference</description>
+    </key>
+
+    <key name="spotify-playlist-numbering" type="b">
+      <default>true</default>
+      <summary>Spotify playlist numbering</summary>
+      <description>Add track numbers to playlist downloads</description>
+    </key>
+
+    <key name="spotify-metadata" type="b">
+      <default>true</default>
+      <summary>Spotify metadata</summary>
+      <description>Include rich metadata and album art</description>
+    </key>
+
+    <key name="cookies-path" type="s">
+      <default>""</default>
+      <summary>Custom cookies file path</summary>
+      <description>Path to custom cookies.txt file for YouTube authentication</description>
+    </key>
+
+    <key name="auto-update-cookies" type="b">
+      <default>false</default>
+      <summary>Auto-update cookies</summary>
+      <description>Automatically update cookies from browser when needed</description>
+    </key>
+
+  </schema>
+</schemalist>
+

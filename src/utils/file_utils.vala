@@ -23,7 +23,6 @@ namespace Ongaku {
             try {
                 var file = File.new_for_path(music_dir);
                 if (!file.query_exists()) {
-                    // Try "Música" folder
                     music_dir = Path.build_filename(home, "Música");
                     file = File.new_for_path(music_dir);
 
@@ -60,7 +59,6 @@ namespace Ongaku {
                         int64 size = (int64)glib_info.get_size();
                         string size_str = format_file_size(size);
 
-                        // Use the new get_modification_date_time() method
                         string date_str = "";
                         var datetime = glib_info.get_modification_date_time();
                         if (datetime != null) {

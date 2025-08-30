@@ -2,6 +2,7 @@ namespace Ongaku {
     public class ProgressIndicator : Gtk.Box {
         private Gtk.ProgressBar progress_bar;
         private Gtk.Label progress_text;
+        private uint timeout_id = 0;
         private bool is_active = false;
         
         public ProgressIndicator() {
@@ -9,6 +10,10 @@ namespace Ongaku {
             setup_ui();
         }
         
+        ~ProgressIndicator() {
+            cleanup();
+        }
+
         private void setup_ui() {
             add_css_class("toolbar");
             
@@ -33,7 +38,8 @@ namespace Ongaku {
             append(progress_box);
         }
         
-        public void start(string initial_text) {
+        public void start(string initial_text, string[]? custom_phases = null) {
+            if (is_active) return;
             is_active = true;
             progress_bar.set_visible(true);
             progress_text.set_visible(true);
@@ -41,30 +47,53 @@ namespace Ongaku {
             progress_bar.set_text("0%");
             progress_bar.set_fraction(0.0);
             
-            simulate_progress();
+            start_progress_simulation(custom_phases);
+        }
+
+        public void update_progress(double fraction, string text) {
+            if (!is_active) return;
+
+            progress_bar.set_fraction(fraction.clamp(0.0, 1.0));
+            progress_bar.set_text("%.0f%%".printf(fraction * 100));
+            progress_text.set_text(text);
         }
         
         public void finish() {
+            if (!is_active) return;
+            cleanup();
+        }
+
+        private void cleanup() {
             is_active = false;
+
+            if (timeout_id != 0) {
+                Source.remove(timeout_id);
+                timeout_id = 0;
+            }
+
             progress_bar.set_visible(false);
             progress_text.set_visible(false);
         }
         
-        private void simulate_progress() {
-            if (!is_active) return;
-            
-            string[] phases = {
-                "Fetching video information...",
-                "Extracting audio stream...",
-                "Converting to MP3...",
-                "Finalizing download..."
-            };
+        private void start_progress_simulation(string[]? custom_phases) {
+            string[] phases;
+            if (custom_phases != null) {
+                phases = custom_phases;
+            } else {
+                phases = {
+                    "Initializing...",
+                    "Processing...",
+                    "Finalizing..."
+                };
+            }
             
             int phase = 0;
             double progress = 0.0;
             
-            Timeout.add(300, () => {
-                if (!is_active) return false;
+            timeout_id = Timeout.add(300, () => {
+                if (!is_active) {
+                    return false;
+                }
                 
                 progress += 0.02;
                 
@@ -80,8 +109,12 @@ namespace Ongaku {
                 progress_bar.set_fraction(progress);
                 progress_bar.set_text("%.0f%%".printf(progress * 100));
                 
-                return is_active;
+                return true;
             });
+        }
+
+        public bool get_is_active() {
+            return is_active;
         }
     }
 }
